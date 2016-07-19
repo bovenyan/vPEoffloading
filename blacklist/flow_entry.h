@@ -14,6 +14,8 @@ typedef struct flow_entry {
     unsigned int dst_port;
     unsigned int cookie;
 
+    unsigned int out_port;
+
     int byte_count;
     bool offloaded;
     struct flow_entry * next;
@@ -28,6 +30,8 @@ void create_add_flow_msg(int dpid, flow_entry * fe,
 void create_del_flow_msg(int dpid, flow_entry * fe,
                          char * json_str, int * len, int cookie);
 
-bool match_entry(char * json_string, flow_entry * entry);
+bool match_entry_json(char * json_string, flow_entry * entry);
+
+bool match_entry_agg(flow_entry * agg, flow_entry * entry);
 
 #endif

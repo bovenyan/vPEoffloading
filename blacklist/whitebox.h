@@ -5,16 +5,18 @@
 #include "flow_entry.h"
 
 typedef struct whitebox {
-    int lswitch_dpid;
-    int rswitch_dpid;
-    flow_entry * offload_list;
+    uint64_t dpid;
+    flow_entry * routing_table;
 } whitebox;
 
-whitebox * create_whitebox();
+whitebox * create_whitebox(int dpid);
 
-void load_black_list(const char * filename, whitebox * wb);
+void init_whitebox(const char * url, whitebox * wb);
 
-void update_stats(whitebox * wb);
+void load_routes(const char * filename, whitebox * wb);
 
+void offload_aggregate(const char * url, flow_entry * agg, whitebox * wb);
+
+void update_stats(const char * url, whitebox * wb);
 
 #endif

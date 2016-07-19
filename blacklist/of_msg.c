@@ -1,50 +1,53 @@
 #include "of_msg.h"
+#include <stdio.h>
 
 void switch_stat_cb(void * ptr, size_t size, size_t nmemb, void * userdata){
     bool ready = false;
     char * ptr_c = (char*)ptr;
+    whitebox * wb = (whitebox *)userdata;
+    
     for (int i = 0; i < size; ++i){
         if (ptr_c[i] == '\0')
             break;
-        if (ptr_c[i] == '[' || ptr_c[i] == ']'){
+        if (ptr_c[i] == '[' || ptr_c[i] == ']' || ptr_c[i] == ','){
             ptr_c[i] = ' ';
-        }
-        if (ptr_c[i] == ','){
-            ready = true;
         }
     }
 
-    if (!ready){
+    if (atoi(ptr_c) != 0){
+        wb = create_whitebox(atoi(ptr_c));  
+    }
+    else{
         printf("Switch not ready \n");
         exit(1);
     }
 }
 
-void of_get_switch_stat(char * url){
+void of_get_switch_stat(const char * url, whitebox * wb){
     char full_url[50];
     strcpy(full_url, url);
 
     strcat(full_url, "/stats/switches");
 
-    get_url(url, switch_stat_cb, NULL);
+    get_url(full_url, switch_stat_cb, (void *)wb);
 }
 
-void of_add_flow(char * url, char * data){
+void of_add_flow(const char * url, char * data){
     char full_url[50];
     strcpy(full_url, url);
 
     strcat(full_url, "/stats/flowentry/add");
     
-    post_url(url, data);
+    post_url(full_url, data);
 }
 
-void of_del_flow(char * url, char * data){
+void of_del_flow(const char * url, char * data){
     char full_url[50];
     strcpy(full_url, url);
 
     strcat(full_url, "/stats/flowentry/delete");
     
-    post_url(url, data);
+    post_url(full_url, data);
 }
 
 void flow_stats_cb(void * ptr, size_t size, size_t nmemb, void * userdata){
@@ -52,11 +55,11 @@ void flow_stats_cb(void * ptr, size_t size, size_t nmemb, void * userdata){
     *((char*)userdata + size) = '\0';
 }
 
-void of_flow_stats(char * url, int dpid, char * results){
+void of_flow_stats(const char * url, int dpid, char * results){
     char full_url[50];
     strcpy(full_url, url);
     int len = strlen(full_url);
     sprintf(full_url + len, "/stats/flowentry/%d", dpid);
     
-    get_url(url, flow_stats_cb, (void *) results);
+    get_url(full_url, flow_stats_cb, (void *) results);
 }

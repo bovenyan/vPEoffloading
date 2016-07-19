@@ -75,7 +75,7 @@ void create_del_flow_msg(int dpid, flow_entry * fe,
                    \"cookie_mask\": 65535\"}\'", dpid, cookie);
 }
 
-bool match_entry(char * json_string, flow_entry * entry) {
+bool match_entry_json(char * json_string, flow_entry * entry) {
     char * ptr;
     char * new_ptr;
     char * end_ptr;
@@ -154,3 +154,30 @@ bool match_entry(char * json_string, flow_entry * entry) {
     return true;
 }
 
+bool match_entry_agg(flow_entry * agg, flow_entry * entry) {
+    if (agg->src_port != entry->src_port)
+        return false;
+    if (agg->dst_port != entry->dst_port)
+        return false;
+
+    unsigned int src_mask = agg->src_mask;
+    unsigned int dst_mask = agg->dst_mask;
+
+    if ((agg->dst_mask & entry->dst_mask) == entry->dst_mask) {
+        dst_mask = entry->dst_mask;
+    }
+
+    if ((agg->src_mask & entry->src_mask) == entry->src_mask) {
+        src_mask = entry->src_mask;
+    }
+
+    if ((src_mask & agg->src_ip) != (src_mask & entry->src_ip)){
+        return false;
+    }
+
+    if ((dst_mask & agg->dst_ip) != (dst_mask & entry->dst_ip)){
+        return false;
+    }
+
+    return true;
+}

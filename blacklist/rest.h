@@ -1,6 +1,7 @@
 #ifndef REST_H
 #define REST_H
 #include <curl/curl.h>
+
 typedef void (*call_back)(void *ptr, size_t size,
                           size_t nmemb, void * userdata);
 
