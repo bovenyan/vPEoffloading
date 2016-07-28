@@ -15,6 +15,6 @@ void of_add_flow(const char * url, char * data);
 
 void of_del_flow(const char * url, char * data);
 
-void of_flow_stats(const char * url, int dpid, char * result);
+void of_flow_stats(const char * url, char * dpid, char * result);
 
 #endif

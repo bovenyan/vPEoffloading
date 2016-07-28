@@ -58,11 +58,11 @@ void flow_stats_cb(void * ptr, size_t size, size_t nmemb, void * userdata){
     *((char*)userdata + size) = '\0';
 }
 
-void of_flow_stats(const char * url, int dpid, char * results){
+void of_flow_stats(const char * url, char * dpid, char * results){
     char full_url[50];
     strcpy(full_url, url);
     int len = strlen(full_url);
-    sprintf(full_url + len, "/stats/flowentry/%d", dpid);
+    sprintf(full_url + len, "/stats/flowentry/%s", dpid);
     
     get_url(full_url, flow_stats_cb, (void *) results);
 }

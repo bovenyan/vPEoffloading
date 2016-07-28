@@ -25,11 +25,11 @@ typedef struct flow_entry {
 
 flow_entry * create_flow_entry(char * line, int len, int cookie);
 
-void create_add_flow_msg(int dpid, flow_entry * fe,
+void create_add_flow_msg(char * dpid, flow_entry * fe,
                          char * json_str, int * len,
                          int out_port, int soft_timeout);
 
-void create_del_flow_msg(int dpid, flow_entry * fe,
+void create_del_flow_msg(char * dpid, flow_entry * fe,
                          char * json_str, int * len, int cookie);
 
 bool match_entry_json(char * json_string, flow_entry * entry);

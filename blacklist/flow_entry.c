@@ -40,7 +40,7 @@ flow_entry * create_flow_entry(char * line, int len, int cookie) {
     return ptr;
 }
 
-void create_add_flow_msg(int dpid, flow_entry * fe, char * json_str,
+void create_add_flow_msg(char * dpid, flow_entry * fe, char * json_str,
                          int * len, int out_port, int soft_timeout) {
     char match[MAX_OF_MATCH_LEN];
     strcpy(match, "\"match\": { ");
@@ -68,13 +68,13 @@ void create_add_flow_msg(int dpid, flow_entry * fe, char * json_str,
 
     strcat(match, "}");
 
-    *len = sprintf(json_str, "\'{\"dpid\": %d, \"cookie\": %d, \"cookie_mask\": 65535, \"idle_timeout\": %d, \"priority\": 100, \"table_id\": 0, %s, \"actions\":[{\"type\": \"OUTPUT\", \"port\":%d}]}\'",
+    *len = sprintf(json_str, "\'{\"dpid\": %s, \"cookie\": %d, \"cookie_mask\": 65535, \"idle_timeout\": %d, \"priority\": 100, \"table_id\": 0, %s, \"actions\":[{\"type\": \"OUTPUT\", \"port\":%d}]}\'",
                    dpid, fe->cookie, soft_timeout, match, 0);
 }
 
-void create_del_flow_msg(int dpid, flow_entry * fe,
+void create_del_flow_msg(char * dpid, flow_entry * fe,
                          char * json_str, int * len, int cookie) {
-    *len = sprintf(json_str, "\'{\"dpdk:\" %d \"cookie\": %d, \
+    *len = sprintf(json_str, "\'{\"dpid:\" %s \"cookie\": %d, \
                    \"cookie_mask\": 65535\"}\'", dpid, cookie);
 }
 

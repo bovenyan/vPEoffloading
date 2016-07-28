@@ -3,13 +3,13 @@
 #include <stdlib.h>
 #include "of_msg.h"
 
-whitebox * create_whitebox(int dpid){
+whitebox * create_whitebox(char * dpid){
     whitebox * wb = (whitebox *)malloc(sizeof(whitebox));
-    wb->dpid = dpid;
+    strcpy(wb->dpid, dpid);
     wb->routing_table = (flow_entry *)malloc(sizeof(flow_entry));
     wb->routing_table->next = NULL;
 
-    printf("whitebox created, connected with dpid: %d\n", dpid);
+    printf("whitebox created, connected with dpid: %s\n", dpid);
     return wb;
 }
 

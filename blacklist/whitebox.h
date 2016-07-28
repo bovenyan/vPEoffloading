@@ -8,11 +8,12 @@
 #define MAX_OF_MSG_LEN 500
 
 typedef struct whitebox {
-    uint64_t dpid;
+    //uint64_t dpid;
+    char dpid[15];
     flow_entry * routing_table;
 } whitebox;
 
-whitebox * create_whitebox(int dpid);
+whitebox * create_whitebox(char * dpid);
 
 void init_whitebox(const char * url, const char * filename, whitebox ** wb_ptr);
 
