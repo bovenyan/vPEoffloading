@@ -4,8 +4,10 @@
 void switch_stat_cb(void * ptr, size_t size, size_t nmemb, void * userdata){
     bool ready = false;
     char * ptr_c = (char*)ptr;
-    whitebox * wb = (whitebox *)userdata;
+    whitebox ** wb_ptr = (whitebox **)userdata;
     
+    printf("get URL: %s\n", ptr_c);
+
     for (int i = 0; i < size; ++i){
         if (ptr_c[i] == '\0')
             break;
@@ -15,7 +17,7 @@ void switch_stat_cb(void * ptr, size_t size, size_t nmemb, void * userdata){
     }
 
     if (atoi(ptr_c) != 0){
-        wb = create_whitebox(atoi(ptr_c));  
+        *wb_ptr = create_whitebox(atoi(ptr_c));  
     }
     else{
         printf("Switch not ready \n");
@@ -23,7 +25,7 @@ void switch_stat_cb(void * ptr, size_t size, size_t nmemb, void * userdata){
     }
 }
 
-void of_get_switch_stat(const char * url, whitebox * wb){
+void of_get_switch_stat(const char * url, whitebox ** wb){
     char full_url[50];
     strcpy(full_url, url);
 
@@ -37,6 +39,7 @@ void of_add_flow(const char * url, char * data){
     strcpy(full_url, url);
 
     strcat(full_url, "/stats/flowentry/add");
+    printf("len of url: %s\n", full_url);
     
     post_url(full_url, data);
 }

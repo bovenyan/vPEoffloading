@@ -5,6 +5,8 @@
 #include "util.h"
 #include <stdlib.h>
 
+#define MAX_OF_MATCH_LEN 400
+
 typedef struct flow_entry {
     unsigned int src_ip;
     unsigned int src_mask;

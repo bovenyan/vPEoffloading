@@ -7,6 +7,8 @@ flow_entry * create_flow_entry(char * line, int len, int cookie) {
     ptr->src_ip = 0;
     ptr->src_port = 0;
     ptr->dst_port = 0;
+    ptr->dst_mask = (unsigned int)(4294967295);
+    ptr->src_mask = (unsigned int)(4294967295);
     ptr->cookie = cookie;
 
     char * pch;
@@ -18,55 +20,56 @@ flow_entry * create_flow_entry(char * line, int len, int cookie) {
     pch = strtok(NULL, " \t");
 
     if (strncmp(pch, "*", 1) != 0) {
-        ptr->dst_ip = ip_str2int(pch);  // src IP
+        ptr->dst_ip = ip_str2int(pch);  // dst IP
     }
     pch = strtok(NULL, " \t");
 
     if (strncmp(pch, "*", 1) != 0) {
-        ptr->src_port = atoi(pch);  // src IP
+        ptr->src_port = atoi(pch);  // src port
     }
     pch = strtok(NULL, " \t");
 
     if (strncmp(pch, "*", 1) != 0) {
-        ptr->dst_port = ip_str2int(pch);  // src IP
+        ptr->dst_port = atoi(pch);  // dst port
     }
 
     ptr->byte_count = 0;
     ptr->offloaded = false;
+    ptr->next = NULL;
 
     return ptr;
 }
 
 void create_add_flow_msg(int dpid, flow_entry * fe, char * json_str,
                          int * len, int out_port, int soft_timeout) {
-    char match[200];
-    strcpy(match, "\"match\": {");
+    char match[MAX_OF_MATCH_LEN];
+    strcpy(match, "\"match\": { ");
+
+    sprintf(match + strlen(match), "\"dl_type\": 2048, ");
+    sprintf(match + strlen(match), "\"nw_proto\": 6");
 
     if (fe->src_ip != 0) {
-        sprintf(match + strlen(match), "\"nw_src: %s\"",
+        sprintf(match + strlen(match), ", \"nw_src\": \"%s\"",
                 ip_int2str(fe->src_ip));
     }
 
     if (fe->dst_ip != 0) {
-        sprintf(match + strlen(match), ", \"nw_dst: %s\"",
+        sprintf(match + strlen(match), ", \"nw_dst\": \"%s\"",
                 ip_int2str(fe->dst_ip));
     }
 
     if (fe->src_port != 0) {
-        sprintf(match + strlen(match), ", \"tp_src: %d\"", fe->src_port);
+        sprintf(match + strlen(match), ", \"tp_src\": %u", fe->src_port);
     }
 
     if (fe->dst_port != 0) {
-        sprintf(match + strlen(match), ", \"tp_dst: %d\"", fe->dst_port);
+        sprintf(match + strlen(match), ", \"tp_dst\": %u", fe->dst_port);
     }
 
     strcat(match, "}");
 
-    *len = sprintf(json_str, "\'{ \"dpid\": %d, \"cookie\": %d, \
-                   \"cookie_mask\": 65535, \"idle_timeout\": %d\
-                   \"priority\":100, %s, \"actions\":[\"type\":\
-                   \"OUTPUT\", \"port\":%d]}\'",
-                   dpid, fe->cookie, soft_timeout, match, out_port);
+    *len = sprintf(json_str, "\'{\"dpid\": %d, \"cookie\": %d, \"cookie_mask\": 65535, \"idle_timeout\": %d, \"priority\": 100, \"table_id\": 0, %s, \"actions\":[{\"type\": \"OUTPUT\", \"port\":%d}]}\'",
+                   dpid, fe->cookie, soft_timeout, match, 0);
 }
 
 void create_del_flow_msg(int dpid, flow_entry * fe,
@@ -155,9 +158,9 @@ bool match_entry_json(char * json_string, flow_entry * entry) {
 }
 
 bool match_entry_agg(flow_entry * agg, flow_entry * entry) {
-    if (agg->src_port != entry->src_port)
+    if (agg->src_port != 0 && agg->src_port != entry->src_port)
         return false;
-    if (agg->dst_port != entry->dst_port)
+    if (agg->dst_port != 0 && agg->dst_port != entry->dst_port)
         return false;
 
     unsigned int src_mask = agg->src_mask;
@@ -170,6 +173,11 @@ bool match_entry_agg(flow_entry * agg, flow_entry * entry) {
     if ((agg->src_mask & entry->src_mask) == entry->src_mask) {
         src_mask = entry->src_mask;
     }
+
+    printf("src mask %u, agg src_ip %u, entry src_ip %u\n",
+            src_mask, agg->src_ip, entry->src_ip);
+    printf("dst mask %u, agg dst_ip %u, entry dst_ip %u\n",
+            dst_mask, agg->dst_ip, entry->dst_ip);
 
     if ((src_mask & agg->src_ip) != (src_mask & entry->src_ip)){
         return false;

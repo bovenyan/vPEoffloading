@@ -474,6 +474,9 @@ class StatsController(ControllerBase):
             LOG.debug('invalid syntax %s', req.body)
             return Response(status=400)
 
+        if(isinstance(flow, str)):   # boven: amend fucking libcurl
+            flow = json.loads(flow)
+
         dpid = flow.get('dpid')
 
         if type(dpid) == str and not dpid.isdigit():
